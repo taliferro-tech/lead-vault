@@ -1,6 +1,6 @@
 {
   "name": "lead-vault",
-  "version": "0.0.25",
+  "version": "0.0.26",
   "scripts": {
     "ng": "ng",
     "generate-version": "node scripts/generate-version.js",
