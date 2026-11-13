@@ -420,7 +420,12 @@ export class SearchPageComponent implements OnInit, OnDestroy {
           // This user is out for today; validation still works for others.
           this.validationUsage = error?.error?.usage || this.validationUsage;
           this.errorMessage = error?.error?.message || "You've used today's email checks. They reset tomorrow.";
-        } else if ( code === 'daily_limit_exceeded' || code === 'insufficient_credits' ) {
+        } else if ( code === 'daily_limit_exceeded' ) {
+          // Shared daily cap (25/day across all tenants) is used up; resets tomorrow.
+          this.validateEmailUnavailable = true;
+          this.mode = 'search';
+          this.errorMessage = "Sorry, we've hit today's limit for validating emails. Please try again tomorrow - you can still search Lead Vault.";
+        } else if ( code === 'insufficient_credits' ) {
           this.validateEmailUnavailable = true;
           this.mode = 'search';
           this.errorMessage = 'Email validation is temporarily unavailable - try Search Lead Vault instead.';
