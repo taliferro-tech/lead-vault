@@ -3,10 +3,19 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { filter, map, startWith } from 'rxjs';
 import { MatchStore } from './match-store.service';
+import { LeadVaultViewerService } from '../../services/lead-vault-viewer.service';
+import { BrowseModeBannerComponent } from '../../shared/browse-mode-banner/browse-mode-banner.component';
 
 type StepId = 'company' | 'criteria' | 'results';
 
 const STEP_LABELS: Record<StepId, string> = { company: 'Company', criteria: 'Criteria', results: 'Results' };
+
+/** What each step does, for the signed-out browse-mode card. */
+const BROWSE_COPY: Record<StepId, string> = {
+  company: 'You’re not signed in. Here you name the company you’re matching for and its website, then pick what a good partner looks like, and Lead Vault finds the businesses that fit. You can try it as you are; sign in with 16Ahead to see every match, get the AI’s best pick and export them.',
+  criteria: 'You’re not signed in. Here you pick what matters (industry, location, size and more) and Lead Vault counts the businesses that match as you go. You can try it as you are; sign in with 16Ahead to see every match, get the AI’s best pick and export them.',
+  results: 'You’re not signed in, so you see the first page of matches. Sign in with 16Ahead to see every match, get the AI’s best pick and export them.',
+};
 
 /**
  * Frame for the match flow: the stepper (Company › Criteria › Results on the
@@ -16,7 +25,7 @@ const STEP_LABELS: Record<StepId, string> = { company: 'Company', criteria: 'Cri
 @Component( {
   selector: 'lv-match-shell',
   standalone: true,
-  imports: [ RouterOutlet, RouterLink ],
+  imports: [ RouterOutlet, RouterLink, BrowseModeBannerComponent ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './match.css',
   // Global so the step components share it; every class is prefixed lvm-.
@@ -53,6 +62,12 @@ const STEP_LABELS: Record<StepId, string> = { company: 'Company', criteria: 'Cri
         }
       </header>
 
+      @if ( signedOut() ) {
+        <div class="lvm-browse" data-cy="match-browse-mode">
+          <lv-browse-mode-banner surfaceLabel="Lead Vault Match" [customCopy]="browseCopy()" />
+        </div>
+      }
+
       <router-outlet />
     </div>
   `,
@@ -60,6 +75,10 @@ const STEP_LABELS: Record<StepId, string> = { company: 'Company', criteria: 'Cri
 export class MatchShellComponent {
   protected readonly store = inject( MatchStore );
   private readonly router = inject( Router );
+  private readonly viewer = toSignal( inject( LeadVaultViewerService ).viewer$ );
+
+  /** Only once we know they're signed out, so signed-in people never see it flash. */
+  protected readonly signedOut = computed( () => this.viewer()?.status === 'signed-out' );
 
   constructor () {
     this.store.startLiveCount();
@@ -92,6 +111,8 @@ export class MatchShellComponent {
       state: index < activeIndex ? 'done' : index === activeIndex ? 'active' : 'todo',
     } ) );
   } );
+
+  protected readonly browseCopy = computed( () => BROWSE_COPY[ this.activeStep() ] );
 
   protected readonly activeLabel = computed( () => STEP_LABELS[ this.activeStep() ] );
   protected readonly activeNumber = computed( () => this.stepIds().indexOf( this.activeStep() ) + 1 );
