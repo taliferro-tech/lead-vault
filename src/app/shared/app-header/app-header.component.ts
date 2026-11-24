@@ -29,6 +29,7 @@ export class AppHeaderComponent {
   readonly isLoggedIn$ = this.authService.isLoggedIn();
   readonly userName$ = this.authService.getUser().pipe( map( user => user?.displayName || '' ) );
   readonly userEmail$ = this.authService.getUser().pipe( map( user => user?.email || '' ) );
+  readonly userId$ = this.authService.getUser().pipe( map( user => user?.uid || '' ) );
 
   /** True on the landing page ('/', ignoring query and fragment). */
   readonly isLanding = toSignal(

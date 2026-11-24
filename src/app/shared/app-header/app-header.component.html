@@ -22,6 +22,6 @@
         <span>Dark</span>
       }
     </button>
-    <app-platform-menu [isLoggedIn]="(isLoggedIn$ | async) ?? false" [userName]="(userName$ | async) ?? ''" [userEmail]="(userEmail$ | async) ?? ''" (signIn)="signIn()" (signOut)="signOut()" />
+    <app-platform-menu [isLoggedIn]="(isLoggedIn$ | async) ?? false" [userName]="(userName$ | async) ?? ''" [userEmail]="(userEmail$ | async) ?? ''" [userId]="(userId$ | async) ?? ''" (signIn)="signIn()" (signOut)="signOut()" />
   </div>
 </header>
